@@ -1,0 +1,52 @@
+<div class="card">
+  <!-- Header Card -->
+  <div class="card-header">
+    <h1 class="card-title">Gestión de Casas</h1>
+  </div>
+
+  <!-- Filtros y botones -->
+  <div class="card-body">
+    <div class="d-flex justify-content-between">
+      <div>
+        <button class="btn btn-primary" (click)="openFormCasa()">Agregar Casa</button>
+        <button class="btn btn-outline-secondary" (click)="toggleCasas()">
+          {{ showingActive ? 'Mostrar Inactivos' : 'Mostrar Activos' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabla de Casas -->
+    <table class="table table-bordered mt-3">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Nombre</th>
+          <th scope="col">Dirección</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let casa of casas">
+          <td>{{ casa.id_casa }}</td>
+          <td>{{ casa.nombre }}</td>
+          <td>{{ casa.direccion }}</td>
+          <td>
+            <span class="badge" [ngClass]="casa.estado === 'A' ? 'bg-success' : 'bg-danger'">
+              {{ casa.estado === 'A' ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td>
+            <button
+              class="btn"
+              [ngClass]="casa.estado === 'A' ? 'btn-danger' : 'btn-success'"
+              (click)="toggleCasaState(casa.id_casa,casa.nombre, casa.estado)"
+            >
+              {{ casa.estado === 'A' ? 'Eliminar' : 'Restaurar' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
