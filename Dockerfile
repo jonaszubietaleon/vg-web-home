@@ -1,19 +1,32 @@
-FROM node:18
+# Usamos una imagen base con Java (Temurin es la distribución de OpenJDK)
+FROM eclipse-temurin:17-jdk AS build
 
-RUN mkdir -p /app
-
+# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-COPY package*.json /app
+# Copiamos todo el contenido del proyecto en el contenedor
+COPY . .
 
-RUN npm install
+# Aseguramos que el script mvnw tenga permisos de ejecución
+RUN chmod +x ./mvnw
 
-COPY . /app
-# Copiar el script de entrada
-COPY entrypoint.sh /app/entrypoint.sh
+# Ejecutamos Maven para descargar las dependencias sin hacer tests (solo para hacer offline)
+RUN ./mvnw dependency:go-offline
 
-RUN chmod +x /app/entrypoint.sh
+# Ejecutamos Maven para compilar el proyecto y crear el archivo JAR (sin tests)
+RUN ./mvnw clean package -DskipTests
 
-EXPOSE 4200
+# Usamos otra imagen base para correr la aplicación (en este caso, una de OpenJDK sin Maven)
+FROM eclipse-temurin:17-jre
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Directorio de trabajo en el contenedor final
+WORKDIR /app
+
+# Copiamos el archivo JAR generado desde la etapa anterior
+COPY --from=build /app/target/*.jar /app/app.jar
+
+# Exponemos el puerto 8080
+EXPOSE 8080
+
+# Comando para ejecutar el archivo JAR
+CMD ["java", "-jar", "vg-ms-casas.jar"]
